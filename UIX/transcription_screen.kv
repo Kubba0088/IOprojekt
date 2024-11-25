@@ -1,0 +1,32 @@
+<TranscriptionScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 40
+        spacing: 20
+
+        Label:
+            text: "Podgląd Transkrypcji"
+            font_size: 28
+            bold: True
+            color: (0.1, 0.6, 0.8, 1)
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: transcription_view
+            text: root.transcription_text
+            font_size: 18
+            multiline: True
+            readonly: True
+            background_color: (0.9, 0.9, 0.9, 1)
+            foreground_color: (0, 0, 0, 1)
+            size_hint_y: 0.8
+
+        Button:
+            text: "Powrót"
+            font_size: 20
+            background_color: (0.8, 0.2, 0.2, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: 60
+            on_release: app.root.current = 'main'

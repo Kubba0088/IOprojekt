@@ -1,0 +1,31 @@
+<MainScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 40
+        spacing: 20
+
+        Label:
+            text: "Aplikacja do Generowania Notatek"
+            font_size: 32
+            bold: True
+            color: (0.1, 0.6, 0.8, 1)
+            size_hint_y: None
+            height: 60
+
+        Button:
+            text: "Rozpocznij Spotkanie"
+            font_size: 20
+            background_color: (0.2, 0.6, 0.8, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: 60
+            on_release: app.root.current = 'transcription'
+
+        Button:
+            text: "Ustawienia"
+            font_size: 20
+            background_color: (0.3, 0.7, 0.9, 1)
+            color: (1, 1, 1, 1)
+            size_hint_y: None
+            height: 60
+            on_release: app.root.current = 'settings'
