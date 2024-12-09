@@ -6,88 +6,51 @@
 
         Label:
             text: "Ustawienia"
-            font_size: 32
+            font_size: 28
             bold: True
             color: (0.1, 0.6, 0.8, 1)
             size_hint_y: None
-            height: 60
-
-        BoxLayout:
-            orientation: 'horizontal'
-            spacing: 10
-            size_hint_y: None
             height: 50
 
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 10
+
             Label:
-                text: "Język Transkrypcji:"
+                text: "Język:"
                 font_size: 18
-                size_hint_x: 0.5
 
             Spinner:
                 id: language_spinner
-                text: "Polski"
-                values: ["Polski", "Angielski"]
-                font_size: 16
-                size_hint_x: 0.5
-                background_color: (0.8, 0.8, 0.8, 1)
-
-        BoxLayout:
-            orientation: 'horizontal'
-            spacing: 10
-            size_hint_y: None
-            height: 50
+                text: "polski"
+                values: ["polski", "angielski", "niemiecki"]
 
             Label:
-                text: "Format Zapisów:"
+                text: "Format zapisu:"
                 font_size: 18
-                size_hint_x: 0.5
 
             Spinner:
                 id: format_spinner
-                text: "PDF"
-                values: ["PDF", "TXT"]
-                font_size: 16
-                size_hint_x: 0.5
-                background_color: (0.8, 0.8, 0.8, 1)
-
-        BoxLayout:
-            orientation: 'horizontal'
-            spacing: 10
-            size_hint_y: None
-            height: 50
+                text: "txt"
+                values: ["txt", "docx", "pdf"]
 
             Label:
-                text: "Max miejsce (MB):"
+                text: "Maksymalne miejsce (MB):"
                 font_size: 18
-                size_hint_x: 0.5
 
             TextInput:
                 id: max_space_input
-                text: "500"
-                font_size: 16
+                text: "100"
                 multiline: False
-                input_filter: "int"
-                size_hint_x: 0.5
-                background_color: (0.9, 0.9, 0.9, 1)
-
-        BoxLayout:
-            orientation: 'horizontal'
-            spacing: 10
-            size_hint_y: None
-            height: 50
 
             Label:
-                text: "Jakość Nagrania:"
+                text: "Jakość nagrania:"
                 font_size: 18
-                size_hint_x: 0.5
 
             Spinner:
                 id: quality_spinner
-                text: "Wysoka"
-                values: ["Niska", "Średnia", "Wysoka"]
-                font_size: 16
-                size_hint_x: 0.5
-                background_color: (0.8, 0.8, 0.8, 1)
+                text: "wysoka"
+                values: ["niska", "średnia", "wysoka"]
 
         Button:
             text: "Zapisz Ustawienia"

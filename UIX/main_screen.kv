@@ -19,7 +19,9 @@
             color: (1, 1, 1, 1)
             size_hint_y: None
             height: 60
-            on_release: app.root.current = 'transcription'
+            on_release:
+                app.root.current = 'transcription'
+                app.root.get_screen('main').start_transcription()
 
         Button:
             text: "Ustawienia"
