@@ -20,13 +20,35 @@
             readonly: True
             background_color: (0.9, 0.9, 0.9, 1)
             foreground_color: (0, 0, 0, 1)
-            size_hint_y: 0.8
+            size_hint_y: 0.7
 
-        Button:
-            text: "Powrót"
-            font_size: 20
-            background_color: (0.8, 0.2, 0.2, 1)
-            color: (1, 1, 1, 1)
+        BoxLayout:
+            orientation: 'horizontal'
             size_hint_y: None
             height: 60
-            on_release: app.root.current = 'main'
+            spacing: 10
+
+            Button:
+                text: "Powrót"
+                font_size: 20
+                background_color: (0.8, 0.2, 0.2, 1)
+                color: (1, 1, 1, 1)
+                on_release: app.root.current = 'main'
+                size_hint_x: 0.33
+
+            Button:
+                text: "Wykonaj OCR"
+                font_size: 20
+                background_color: (0.2, 0.6, 0.8, 1)
+                color: (1, 1, 1, 1)
+                on_release:
+                    app.root.get_screen('main').start_ocr()
+                size_hint_x: 0.33
+            Button:
+                text: "Stop OCR"
+                font_size: 20
+                background_color: (0.8, 0.2, 0.2, 1)
+                color: (1, 1, 1, 1)
+                on_release:
+                    app.root.get_screen('main').stop_ocr()
+                size_hint_x: 0.33
