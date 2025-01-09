@@ -12,12 +12,20 @@ from kivy.clock import Clock
 import pyautogui
 import pytesseract
 from PIL import Image
+from fpdf import FPDF
+from docx import Document
 
-model_path = "C:/Users/Kubba008/Desktop/vosk/vosk-model-small-pl-0.22" #pobierz se voska i zmien sciezke
 
-model = Model(model_path)
-recognizer = KaldiRecognizer(model, 16000)
+model_path_pl = "C:/Users/Kubba008/Desktop/vosk/vosk-model-small-pl-0.22"
+model_path_en = "C:/Users/Kubba008/Desktop/vosk/vosk-model-small-en-us-0.15"
 
+model_pl = Model(model_path_pl)
+model_en = Model(model_path_en)
+
+output_file_path = "C:/Users/Kubba008/Desktop/speach.txt"
+output_format = "txt"
+current_model = model_pl
+recognizer = KaldiRecognizer(current_model, 16000)
 p = pyaudio.PyAudio()
 
 input_device_index = 1
@@ -30,6 +38,32 @@ PAUSE_THRESHOLD = 3
 Builder.load_file("main_screen.kv")
 Builder.load_file("transcription_screen.kv")
 Builder.load_file("settings_screen.kv")
+
+
+def save_transcription_to_file(text):
+    try:
+        if output_format == "txt":
+            with open(output_file_path, 'a', encoding='utf-8') as file:
+                file.write(text + "\n")
+            print(f"Transkrypcja zapisana jako TXT: {output_file_path}")
+        elif output_format == "pdf":
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            pdf.multi_cell(0, 10, text)
+            pdf_file_path = output_file_path.replace(".txt", ".pdf")
+            pdf.output(pdf_file_path)
+            print(f"Transkrypcja zapisana jako PDF: {pdf_file_path}")
+        elif output_format == "docx":
+            doc = Document()
+            doc.add_paragraph(text)
+            docx_file_path = output_file_path.replace(".txt", ".docx")
+            doc.save(docx_file_path)
+            print(f"Transkrypcja zapisana jako DOCX: {docx_file_path}")
+        else:
+            print(f"Nieobsługiwany format zapisu: {output_format}")
+    except Exception as e:
+        print(f"Błąd podczas zapisywania do pliku: {e}")
 
 
 class TeamsScreenMonitor:
@@ -67,12 +101,30 @@ class TeamsScreenMonitor:
 
     def save_text_to_file(self, text):
         try:
-            text_file_path = os.path.join(self.output_dir, "recognized_text.txt")
-            with open(text_file_path, 'a', encoding='utf-8') as file:
-                file.write(f"\n{'-' * 40}\nZrzut ekranu z {time.ctime()}:\n{text}")
-            print(f"Rozpoznany tekst zapisany: {text_file_path}")
+            if output_format == "txt":
+                text_file_path = os.path.join(self.output_dir, "recognized_text.txt")
+                with open(text_file_path, 'a', encoding='utf-8') as file:
+                    file.write(f"\n{'-' * 40}\nZrzut ekranu z {time.ctime()}:\n{text}")
+                print(f"Rozpoznany tekst zapisany jako TXT: {text_file_path}")
+            elif output_format == "pdf":
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Arial", size=12)
+                pdf.multi_cell(0, 10, text)
+                pdf_file_path = os.path.join(self.output_dir, "recognized_text.pdf")
+                pdf.output(pdf_file_path)
+                print(f"Rozpoznany tekst zapisany jako PDF: {pdf_file_path}")
+            elif output_format == "docx":
+                doc = Document()
+                doc.add_paragraph(text)
+                docx_file_path = os.path.join(self.output_dir, "recognized_text.docx")
+                doc.save(docx_file_path)
+                print(f"Rozpoznany tekst zapisany jako DOCX: {docx_file_path}")
+            else:
+                print(f"Nieobsługiwany format zapisu: {output_format}")
         except Exception as e:
-            print(f"Błąd podczas zapisywania tekstu do pliku: {e}")
+            print(f"Błąd podczas zapisywania tekstu z OCR: {e}")
+
 
     def process_screen(self):
         print("Robię zrzut i wykonuję OCR...")
@@ -82,7 +134,7 @@ class TeamsScreenMonitor:
             if recognized_text:
                 if recognized_text not in self.saved_texts:
                     print(f"Rozpoznany tekst:\n{recognized_text}")
-                    self.save_text_to_file(recognized_text)
+                    self.save_text_to_file(recognized_text)  # Wywołanie metody zapisu z dynamicznym formatem
                     self.saved_texts.add(recognized_text)
                 else:
                     print("Ten tekst już został zapisany wcześniej, pomijam.")
@@ -102,7 +154,6 @@ class TeamsScreenMonitor:
 
 class MainScreen(Screen):
     ocr_running = False
-
     def start_transcription(self):
         transcription_screen = self.manager.get_screen('transcription')
         transcription_screen.transcription_text = "Transkrypcja audio w toku..."
@@ -171,11 +222,15 @@ class MainScreen(Screen):
                         lambda dt, text=partial_text: self.update_partial_transcription(transcription_screen, text))
                     last_speech_time = time.time()
 
-            if time.time() - last_speech_time > PAUSE_THRESHOLD:
+            if time.time() - last_speech_time > 5:
                 if final_transcription.strip():
-                    final_transcription += ".\n"
-                    Clock.schedule_once(lambda dt, text=final_transcription.strip(): self.display_final_transcription(
-                        transcription_screen, text))
+                    final_transcription += "."
+                    Clock.schedule_once(
+                        lambda dt, text=final_transcription.strip(): self.display_final_transcription(
+                            transcription_screen, text))
+
+                    save_transcription_to_file(final_transcription.strip())
+
                     final_transcription = ""
                 last_speech_time = time.time()
 
@@ -195,15 +250,24 @@ class TranscriptionScreen(Screen):
 
 class SettingsScreen(Screen):
     def save_settings(self):
+        global current_model, recognizer, output_format
+
         selected_language = self.ids.language_spinner.text
         selected_format = self.ids.format_spinner.text
-        max_space = self.ids.max_space_input.text
-        selected_quality = self.ids.quality_spinner.text
 
-        print(f"Wybrano język: {selected_language}")
-        print(f"Wybrany format zapisu: {selected_format}")
-        print(f"Maksymalne miejsce: {max_space} MB")
-        print(f"Jakość nagrania: {selected_quality}")
+        # Przełącz język
+        if selected_language == "polski":
+            current_model = model_pl
+        elif selected_language == "angielski":
+            current_model = model_en
+
+        recognizer = KaldiRecognizer(current_model, 16000)
+
+        output_format = selected_format.lower()
+
+        print(f"Zmieniono język na: {selected_language}")
+        print(f"Zmieniono format zapisu na: {output_format}")
+
 
 
 class MeetNotesApp(App):
