@@ -1,71 +1,95 @@
 <SettingsScreen>:
     BoxLayout:
         orientation: 'vertical'
-        padding: 40
-        spacing: 20
+        padding: [50, 70, 50, 50]
+        spacing: 30
 
         Label:
             text: "Ustawienia"
-            font_size: 28
+            font_size: 32
             bold: True
-            color: (0.1, 0.6, 0.8, 1)
+            color: (0.8, 0.8, 0.8, 1)
             size_hint_y: None
-            height: 50
+            height: 60
 
         BoxLayout:
             orientation: 'vertical'
-            spacing: 10
+            spacing: 15
 
             Label:
                 text: "Język:"
-                font_size: 18
+                font_size: 20
+                color: (0.7, 0.7, 0.7, 1)
 
             Spinner:
                 id: language_spinner
                 text: "polski"
                 values: ["polski", "angielski"]
+                background_color: (0.2, 0.2, 0.2, 1)
+                color: (1, 1, 1, 1)
 
             Label:
                 text: "Format zapisu:"
-                font_size: 18
+                font_size: 20
+                color: (0.7, 0.7, 0.7, 1)
 
             Spinner:
                 id: format_spinner
                 text: "txt"
                 values: ["txt", "docx", "pdf"]
+                background_color: (0.3, 0.3, 0.3, 1)
+                color: (1, 1, 1, 1)
 
             Label:
                 text: "Maksymalne miejsce (MB):"
-                font_size: 18
+                font_size: 20
+                color: (0.7, 0.7, 0.7, 1)
 
             TextInput:
                 id: max_space_input
                 text: "100"
                 multiline: False
+                background_color: (0.15, 0.15, 0.15, 1)
+                foreground_color: (1, 1, 1, 1)
 
             Label:
                 text: "Jakość nagrania:"
-                font_size: 18
+                font_size: 20
+                color: (0.7, 0.7, 0.7, 1)
 
             Spinner:
                 id: quality_spinner
                 text: "wysoka"
                 values: ["niska", "średnia", "wysoka"]
+                background_color: (0.3, 0.3, 0.3, 1)
+                color: (1, 1, 1, 1)
 
         Button:
             text: "Zapisz Ustawienia"
-            font_size: 20
-            background_color: (0.2, 0.6, 0.2, 1)
+            font_size: 22
             color: (1, 1, 1, 1)
             size_hint_y: None
-            height: 60
+            height: 70
             on_release: root.save_settings()
+            canvas.before:
+                Color:
+                    rgba: (0.2, 0.4, 0.2, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20]
 
         Button:
             text: "Powrót"
-            font_size: 20
-            background_color: (0.8, 0.2, 0.2, 1)
+            font_size: 22
             color: (1, 1, 1, 1)
             size_hint_y: None
-            height: 60
+            height: 70
             on_release: app.root.current = 'main'
+            canvas.before:
+                Color:
+                    rgba: (0.4, 0.2, 0.2, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20]

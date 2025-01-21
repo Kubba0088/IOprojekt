@@ -1,33 +1,55 @@
 <MainScreen>:
     BoxLayout:
         orientation: 'vertical'
-        padding: 40
-        spacing: 20
+        padding: [50, 70, 50, 70]
+        spacing: 30
 
         Label:
             text: "Aplikacja do Generowania Notatek"
-            font_size: 32
+            font_size: 36
             bold: True
-            color: (0.1, 0.6, 0.8, 1)
+            color: (0.8, 0.8, 0.8, 1)
             size_hint_y: None
-            height: 60
+            height: 80
+
+        Label:
+            text: root.current_app  # Wyświetlanie wykrytej aplikacji
+            font_size: 20
+            bold: True
+            color: (0.7, 0.7, 0.7, 1)
+            size_hint_y: None
+            height: 50
 
         Button:
             text: "Rozpocznij Spotkanie"
-            font_size: 20
-            background_color: (0.2, 0.6, 0.8, 1)
+            font_size: 24
+            background_color: (0.2, 0.2, 0.2, 1)
             color: (1, 1, 1, 1)
             size_hint_y: None
-            height: 60
+            height: 70
             on_release:
                 app.root.current = 'transcription'
                 app.root.get_screen('main').start_transcription()
+            canvas.before:
+                Color:
+                    rgba: (0.3, 0.3, 0.3, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20]
 
         Button:
             text: "Ustawienia"
-            font_size: 20
-            background_color: (0.3, 0.7, 0.9, 1)
+            font_size: 24
+            background_color: (0.3, 0.3, 0.3, 1)
             color: (1, 1, 1, 1)
             size_hint_y: None
-            height: 60
+            height: 70
             on_release: app.root.current = 'settings'
+            canvas.before:
+                Color:
+                    rgba: (0.4, 0.4, 0.4, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20]

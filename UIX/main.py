@@ -14,15 +14,18 @@ import pytesseract
 from PIL import Image
 from fpdf import FPDF
 from docx import Document
+import pygetwindow as gw
+from pywinauto import Desktop
+from pywinauto import Application
+from PIL import ImageGrab
 
-
-model_path_pl = "C:/Users/Kubba008/Desktop/vosk/vosk-model-small-pl-0.22"
-model_path_en = "C:/Users/Kubba008/Desktop/vosk/vosk-model-small-en-us-0.15"
+model_path_pl = r"C:\Users\Barte\OneDrive\Pulpit\VOSK\vosk-model-small-pl-0.22"
+model_path_en = r"C:\Users\Barte\OneDrive\Pulpit\VOSK\vosk-model-small-en-us-0.15"
 
 model_pl = Model(model_path_pl)
 model_en = Model(model_path_en)
 
-output_file_path = "C:/Users/Kubba008/Desktop/speach.txt"
+output_file_path = r"C:\Users\Barte\OneDrive\Pulpit\Speach\speach.txt"
 output_format = "txt"
 current_model = model_pl
 recognizer = KaldiRecognizer(current_model, 16000)
@@ -39,7 +42,60 @@ Builder.load_file("main_screen.kv")
 Builder.load_file("transcription_screen.kv")
 Builder.load_file("settings_screen.kv")
 
+def get_window_bounds(app_name):
+    try:
+        app = Application(backend="win32").connect(title_re=app_name)
+        window = app.window(title_re=app_name)
+        rect = window.rectangle()  # Pobiera pozycję i wymiary okna
+        return rect.left, rect.top, rect.right, rect.bottom
+    except Exception as e:
+        print(f"Błąd podczas pobierania wymiarów okna: {e}")
+        return None
+    
+def capture_window_area(bounds):
+    if bounds:
+        left, top, right, bottom = bounds
+        screenshot = ImageGrab.grab(bbox=(left, top, right, bottom))  # Zrzut obszaru
+        return screenshot
+    else:
+        print("Nie udało się pobrać wymiarów okna.")
+        return None
 
+def debug_active_window():
+    try:
+        app = Application(backend="win32").connect(active_only=True)
+        active_window = app.windows()[0]  # Pobierz pierwsze aktywne okno
+        window_title = active_window.window_text()
+        print(f"Debug: Tytuł okna: {window_title}")
+        return window_title
+    except Exception as e:
+        print(f"Błąd podczas debugowania aktywnego okna: {e}")
+        return None
+
+
+def detect_meeting_app():
+    try:
+        app = Application(backend="win32").connect(active_only=True)  # Ogranicz do aktywnych aplikacji
+        windows = app.windows()
+        print("-------------------------------------------------")
+        print(windows)
+        for win in windows:
+            window_title = win.window_text().lower()
+            print(f"Debug: Tytuł okna - {window_title}")  # Debugowanie
+
+            if "teams" in window_title:
+                return "Microsoft Teams"
+            elif "webex" in window_title:
+                return "Webex"
+        
+        return "Nie wykryto aplikacji spotkań"
+    except Exception as e:
+        print(f"Błąd podczas wykrywania aplikacji: {e}")
+        return "Nie można wykryć aplikacji"
+
+
+
+    
 def save_transcription_to_file(text):
     try:
         if output_format == "txt":
@@ -69,10 +125,15 @@ def save_transcription_to_file(text):
 class TeamsScreenMonitor:
     def __init__(self, output_dir=None, ocr_lang="eng", screenshot_prefix="teams_screenshot"):
         self.output_dir = output_dir if output_dir else os.path.join(os.path.expanduser("~"), "Desktop")
-        self.ocr_lang = ocr_lang
+        self.ocr_lang = ocr_lang  # Dynamiczny język OCR
         self.screenshot_prefix = screenshot_prefix
         self.saved_texts = set()
         self.screen_number = 1
+
+    def update_ocr_language(self, new_lang):
+        """Aktualizuje język OCR."""
+        print(f"Zmiana języka OCR na: {new_lang}")
+        self.ocr_lang = new_lang
 
     def capture_fullscreen(self):
         try:
@@ -84,6 +145,26 @@ class TeamsScreenMonitor:
         except Exception as e:
             print(f"Błąd podczas robienia zrzutu ekranu: {e}")
             return None
+
+    def perform_ocr_on_window(app_name):
+        bounds = get_window_bounds(app_name)
+        screenshot = capture_window_area(bounds)
+        
+        if screenshot:
+            text = pytesseract.image_to_string(screenshot, lang='pol')  # OCR na zrzucie ekranu
+            return text
+        else:
+            return "Nie udało się wykonać OCR."
+
+    def detect_and_ocr_meeting_app():
+        detected_app = detect_meeting_app()  # Funkcja, która wykrywa aplikację
+        if detected_app in ["Microsoft Teams", "Webex"]:
+            print(f"Przeprowadzanie OCR dla {detected_app}...")
+            ocr_text = perform_ocr_on_window(detected_app)
+            print(f"OCR wynik: {ocr_text}")
+        else:
+            print("Brak odpowiedniej aplikacji do wykonania OCR.")
+
 
     def perform_ocr(self, image_path):
         try:
@@ -154,6 +235,34 @@ class TeamsScreenMonitor:
 
 class MainScreen(Screen):
     ocr_running = False
+    current_app = StringProperty("Wykrywanie aplikacji...")  # Domyślny tekst
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.monitor_running = True
+        self.monitor_instance = TeamsScreenMonitor(
+            output_dir=r"C:\Users\Barte\OneDrive\Pulpit\Screenshots",
+            ocr_lang="eng"
+        )
+        self.app_monitor_thread = Thread(target=self.monitor_meeting_application)
+        self.app_monitor_thread.daemon = True
+        self.app_monitor_thread.start()
+
+    def monitor_meeting_application(self):
+        while self.monitor_running:
+            app_name = detect_meeting_app()
+            print(f"Debug: Aktualnie wykryta aplikacja - {app_name}")
+            self.current_app = f"Aktualna aplikacja: {app_name}"  # Aktualizuje tekst wyświetlany w GUI
+            time.sleep(5)
+
+    def on_leave(self):
+        self.monitor_running = False
+
+    def detect_meeting_application(self):
+        app_name = detect_meeting_app()
+        self.current_app = f"Aktualna aplikacja: {app_name}"
+        print(self.current_app)
+
     def start_transcription(self):
         transcription_screen = self.manager.get_screen('transcription')
         transcription_screen.transcription_text = "Transkrypcja audio w toku..."
@@ -167,7 +276,7 @@ class MainScreen(Screen):
         transcription_screen.transcription_text += "\nOCR w toku..."
         self.ocr_running = True
 
-        monitor = TeamsScreenMonitor(output_dir="C:/Users/Kubba008/Desktop/screeny",ocr_lang="eng") #zmien na swoje gdzie beda sie zapisywac screeny
+        monitor = TeamsScreenMonitor(output_dir=r"C:\Users\Barte\OneDrive\Pulpit\Screenshots",ocr_lang="eng") 
         monitor_thread = Thread(target=monitor.start_monitoring, args=(lambda: self.ocr_running,))
         monitor_thread.daemon = True
         monitor_thread.start()
@@ -254,21 +363,24 @@ class SettingsScreen(Screen):
 
         selected_language = self.ids.language_spinner.text
         selected_format = self.ids.format_spinner.text
-
-        # Przełącz język
         if selected_language == "polski":
             current_model = model_pl
+            ocr_lang = "pol"  
         elif selected_language == "angielski":
             current_model = model_en
+            ocr_lang = "eng"  
 
         recognizer = KaldiRecognizer(current_model, 16000)
 
+   
         output_format = selected_format.lower()
+
+        if hasattr(self.manager.get_screen('main'), 'monitor_instance'):
+            monitor_instance = self.manager.get_screen('main').monitor_instance
+            monitor_instance.update_ocr_language(ocr_lang)
 
         print(f"Zmieniono język na: {selected_language}")
         print(f"Zmieniono format zapisu na: {output_format}")
-
-
 
 class MeetNotesApp(App):
     def build(self):

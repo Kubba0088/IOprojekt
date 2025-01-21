@@ -1,16 +1,16 @@
 <TranscriptionScreen>:
     BoxLayout:
         orientation: 'vertical'
-        padding: 40
-        spacing: 20
+        padding: [50, 70, 50, 50]
+        spacing: 30
 
         Label:
             text: "Podgląd Transkrypcji"
-            font_size: 28
+            font_size: 32
             bold: True
-            color: (0.1, 0.6, 0.8, 1)
+            color: (0.8, 0.8, 0.8, 1)
             size_hint_y: None
-            height: 50
+            height: 60
 
         TextInput:
             id: transcription_view
@@ -18,37 +18,56 @@
             font_size: 18
             multiline: True
             readonly: True
-            background_color: (0.9, 0.9, 0.9, 1)
-            foreground_color: (0, 0, 0, 1)
-            size_hint_y: 0.7
+            background_color: (0.15, 0.15, 0.15, 1)
+            foreground_color: (1, 1, 1, 1)
+            size_hint_y: 0.6
 
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
-            height: 60
-            spacing: 10
+            height: 80
+            spacing: 20
 
             Button:
                 text: "Powrót"
-                font_size: 20
-                background_color: (0.8, 0.2, 0.2, 1)
+                font_size: 22
                 color: (1, 1, 1, 1)
+                size_hint_x: 0.3
                 on_release: app.root.current = 'main'
-                size_hint_x: 0.33
+                canvas.before:
+                    Color:
+                        rgba: (0.2, 0.2, 0.2, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [20]
 
             Button:
                 text: "Wykonaj OCR"
-                font_size: 20
-                background_color: (0.2, 0.6, 0.8, 1)
+                font_size: 22
                 color: (1, 1, 1, 1)
+                size_hint_x: 0.3
                 on_release:
                     app.root.get_screen('main').start_ocr()
-                size_hint_x: 0.33
+                canvas.before:
+                    Color:
+                        rgba: (0.3, 0.3, 0.3, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [20]
+
             Button:
                 text: "Stop OCR"
-                font_size: 20
-                background_color: (0.8, 0.2, 0.2, 1)
+                font_size: 22
                 color: (1, 1, 1, 1)
+                size_hint_x: 0.3
                 on_release:
                     app.root.get_screen('main').stop_ocr()
-                size_hint_x: 0.33
+                canvas.before:
+                    Color:
+                        rgba: (0.2, 0.2, 0.2, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [20]
