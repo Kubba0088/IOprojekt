@@ -19,13 +19,13 @@ from pywinauto import Desktop
 from pywinauto import Application
 from PIL import ImageGrab
 
-model_path_pl = r"C:\Users\Barte\OneDrive\Pulpit\VOSK\vosk-model-small-pl-0.22"
-model_path_en = r"C:\Users\Barte\OneDrive\Pulpit\VOSK\vosk-model-small-en-us-0.15"
+model_path_pl = r"C:\Users\Barte\OneDrive\Pulpit\VOSK\vosk-model-small-pl-0.22" #zmien tutaj ścieżkę
+model_path_en = r"C:\Users\Barte\OneDrive\Pulpit\VOSK\vosk-model-small-en-us-0.15" #zmien tutaj ścieżkę
 
 model_pl = Model(model_path_pl)
 model_en = Model(model_path_en)
 
-output_file_path = r"C:\Users\Barte\OneDrive\Pulpit\Speach\speach.txt"
+output_file_path = r"C:\Users\Barte\OneDrive\Pulpit\Speach\speach.txt" #zmien tutaj ścieżkę
 output_format = "txt"
 current_model = model_pl
 recognizer = KaldiRecognizer(current_model, 16000)
